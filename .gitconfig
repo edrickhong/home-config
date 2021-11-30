@@ -1,0 +1,62 @@
+[user]
+	email = edrickhong@gmail.com
+	name = ehzx
+[core]
+	editor = vim 
+[alias]
+	stage = add #stage file
+	stage-all = !git add . && git status #stage all files and report status
+	unstage = reset HEAD -- #unstage file
+	unstage-all = !git reset HEAD -- . && git status #unstage all files and report status
+	nuke-head = reset --hard HEAD~1 #permanently remove head
+	release-head = reset HEAD~1 --soft #remove head and move changes to working directory
+	drop = checkout -- #remove file in working directory
+	drop-all = !git clean -f -d && git checkout -- . #remove all files in working directory
+	reverse-commit = revert #creates a commit that undoes that commit
+	reverse-head = !git revert HEAD #creates a commit that undoes the head
+	reverse-rel-head = "!f() { git revert HEAD~$1; }; f" #creates a commit that undoes the a commit relative to the head
+	push-all-remotes = "!f() { git remote | xargs -L1 -I R git push R $1; }; f" #push all remotes
+	push-all-remotes-all-branches = !git remote | xargs -L1 git push --all # push all branches to all remotes
+	nuke-file-history = "!f() { git filter-branch -f --index-filter \"git rm -rf --cached --ignore-unmatch $1\" -- --all && rm -rf .git/refs/original/ && git reflog expire --expire=now --all && git gc --prune=now && git gc --aggressive --prune=now; }; f" # permanently remove all references of that file forever
+	list-history-files = !git log --pretty=format: --name-only --diff-filter=A | sort -u #list all files in history
+	nuke-file = checkout HEAD~1 #permanently remove a file
+	lg = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(auto)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' #log
+	store-cred = config credential.helper store #store credentials
+	find-text = "!f() { git -C . grep -n $1 src/*; }; f" #search src dir for text
+	list = config --get-regexp alias #list this
+	rewrite-history-rel = "!f() { git rebase -i HEAD~$1; }; f" #interactive shell to reorder,squash,etc commits
+	diff-commit = "!f() { git diff $1~ $1; }; f" #diff a commit
+	diff-cur-commit = "!f() { git diff HEAD~ HEAD; }; f" #dir the cur commit
+	diff-rel-cur-commit = "!f() { git diff HEAD~$1 HEAD; }; f" #dif current commit with another commit relative to the current one
+	diff-working = "!f() { git diff HEAD; }; f" #diff the working directory
+	diff-rel-commit = "!f() { git diff $1~$2 $1; }; f" #diff a commit and another one relative to the first commit
+	nuke-branch = "!f() { git push --delete $1 $2 && git branch -d $2; }; f" #delete branch on remote and on local
+
+	pull-w-submod = "!f() { git pull && git submodule update; }; f" #diff the working
+	stop-tracking = "!f() { git rm --cached $1; }; f" #stop tracking a file
+        pull-force = "!f() { git fetch && git reset --hard origin/`git symbolic-ref --short -q HEAD`; }; f" #stop tracking a file
+
+	stage-chunks = add -e #only stage parts of a file
+	ignore = "!f() { echo $1 >> .gitignore; }; f" #add file to ignore list
+	test-commit-range = "!f() { git bisect start;git bisect bad $1; git bisect good $2;shift;shift;git bisect run $@;git bisect reset; }; f" # bad,good,test script
+	branch-list = "!f() { git branch -a; }; f" #list all branches
+	branch-create = "!f() { git branch $1; git push -u origin $1;}; f" #create a new branch
+	branch-set-upstream = "!f() { git branch --set-upstream-to $1;}; f" #sets the current active branch to this upstream
+
+
+	stash-chunks = stash -- #only stage parts of a file
+[merge]
+	tool = meld
+[status]
+	submoduleSummary = true
+[diff]
+	submodule = log
+
+[pull]
+	recurseSubmodules = on-demand
+
+[push]
+	recurseSubmodules = on-demand
+
+[fetch]
+	recurseSubmodules = on-demand
