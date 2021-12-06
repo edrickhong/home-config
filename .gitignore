@@ -26,3 +26,5 @@ Templates
 bin
 nvme
 storage
+.gdb_history
+.python_history
