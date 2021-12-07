@@ -192,3 +192,48 @@ class DumpTree(gdb.Command):
 DumpTree()
 
 end
+
+
+
+python
+import gdb
+import termplotlib as tpl
+import sys
+
+
+
+class PlotArr(gdb.Command):
+    def __init__(self):
+        super (PlotArr, self).__init__ ('plotarr', gdb.COMMAND_DATA)
+
+    def invoke(self, arg, from_tty):
+        argv = gdb.string_to_argv(arg)
+        if len(argv) < 2:
+            raise gdb.GdbError('plotarr takes exactly 2 argument.')
+
+
+        arr = argv[0]
+        count = int(argv[1])
+        s = 1
+
+        if len(argv) >= 3:
+            if argv[2].isnumeric():
+                s = int(argv[2])
+
+        x = range(0,count)
+        y = list()
+
+        for i in x:
+            val = gdb.parse_and_eval(arr + '[' + str(i * s) + ']')
+            val = val.cast(gdb.lookup_type('float'))
+            y.append(float(val))
+
+        fig = tpl.figure()
+        fig.plot(x,y,label = 'data', width = 50, height = 15)
+
+        fig.show()
+
+
+PlotArr()
+
+end
