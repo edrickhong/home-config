@@ -104,41 +104,91 @@ PrintArr()
 
 python
 import gdb
-from treelib import Node, Tree
+import pptree
+import sys
+import webbrowser
 
 class PrintTree(gdb.Command):
     def __init__(self):
         super (PrintTree, self).__init__ ('printtree', gdb.COMMAND_DATA)
 
-    def buildtreeAssimp(self,node,parent,bones,tree):
+    def buildtreeAssimp(self,node,parent,bones):
 
-        name = node['name']
+        name = node['name'].string()
         count = node['children_count']
 
-        tree.create_node(name,name, parent = parent)
+        tree = pptree.Node(name,parent)
 
         for i in range(0,count):
             index_array = node['childrenindex_array']
             index = index_array[i]
             n = gdb.parse_and_eval(bones + '[' + str(index) +']')
 
-            self.buildtreeAssimp(n,name,bones,tree)
+            self.buildtreeAssimp(n,tree,bones)
 
+        return tree
 
     def invoke(self, arg, from_tty):
         argv = gdb.string_to_argv(arg)
 
-        if len(argv) != 2:
-            raise gdb.GdbError('printtree takes exactly 2 args.')
+        if len(argv) < 2:
+            raise gdb.GdbError('printtree takes at least 3 args')
 
-        root = gdb.parse_and_eval(argv[0])
-        bones = argv[1]
+        tree = None
 
-        tree = Tree()
-        self.buildtreeAssimp(root,None,bones,tree)
-        tree.show()
+        if argv[0] == 'assimp':
+            root = gdb.parse_and_eval(argv[1])
+            bones = argv[2]
+            tree = self.buildtreeAssimp(root,None,bones)
 
+
+        pptree.print_tree(tree, horizontal = True)
 
 PrintTree()
+
+
+
+class DumpTree(gdb.Command):
+    def __init__(self):
+        super (DumpTree, self).__init__ ('dumptree', gdb.COMMAND_DATA)
+
+    def buildtreeAssimp(self,node,parent,bones):
+
+        name = node['name'].string()
+        count = node['children_count']
+
+        tree = pptree.Node(name,parent)
+
+        for i in range(0,count):
+            index_array = node['childrenindex_array']
+            index = index_array[i]
+            n = gdb.parse_and_eval(bones + '[' + str(index) +']')
+
+            self.buildtreeAssimp(n,tree,bones)
+
+        return tree
+
+    def invoke(self, arg, from_tty):
+        argv = gdb.string_to_argv(arg)
+
+        if len(argv) < 2:
+            raise gdb.GdbError('dumptree takes at least 3 args')
+
+        tree = None
+
+        if argv[0] == 'assimp':
+            root = gdb.parse_and_eval(argv[1])
+            bones = argv[2]
+            tree = self.buildtreeAssimp(root,None,bones)
+
+        filename = 'dump.txt'
+
+        sys.stdout = open(filename,'w')
+        pptree.print_tree(tree, horizontal = True)
+        sys.stdout.close()
+
+        webbrowser.open(filename)
+
+DumpTree()
 
 end
