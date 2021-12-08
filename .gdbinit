@@ -207,6 +207,50 @@ class DumpTree(gdb.Command):
 
 DumpTree()
 
+
+class DiffTree(gdb.Command):
+    def __init__(self):
+        super (DiffTree, self).__init__ ('difftree', gdb.COMMAND_DATA)
+
+    def diff(self,node1,node2):
+        if node1 == None or node2 == None:
+            return node1 == None and node2 == None
+
+        if len(node1.children) != len(node2.children):
+            return False
+
+        res = node1.name == node2.name
+
+        for i in range(0,len(node1.children)):
+            res = res and self.diff(node1.children[i],node2.children[i])
+
+        return res
+
+    def invoke(self, arg, from_tty):
+        argv = gdb.string_to_argv(arg)
+        argv1 = []
+        argv2 = []
+        is_other = False
+
+        for i in range(0,len(argv)):
+            a = argv[i]
+
+            if a == '|':
+                is_other = True
+                continue
+            if not is_other:
+                argv1.append(a)
+            else:
+                argv2.append(a)
+
+        tree1 = createtree(argv1)
+        tree2 = createtree(argv2)
+
+        res = self.diff(tree1,tree2)
+        print('Are these trees the same? ' + str(res))
+
+DiffTree()
+
 end
 
 
