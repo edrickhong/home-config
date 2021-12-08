@@ -217,11 +217,11 @@ class DumpTree(gdb.Command):
         tree = None
 
         if argv[0] == 'assimp':
-            root = gdb.parse_and_eval(argv[1])
-            bones = argv[2]
-            tree = self.buildtreeAssimp(root,None,bones)
+            root = gdb.parse_and_eval(argv[1] + '[0]')
+            bones = argv[1]
+            tree = buildtreeAssimp(root,None,bones)
 
-        filename = 'dump.txt'
+        filename = str(uuid.uuid4()) + '.txt'
 
         sys.stdout = open(filename,'w')
         pptree.print_tree(tree, horizontal = True)
