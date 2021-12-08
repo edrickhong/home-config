@@ -182,34 +182,11 @@ class PrintTree(gdb.Command):
         if len(argv) < 2:
             raise gdb.GdbError('printtree takes at least 3 args')
 
-        tree = None
-
-        if argv[0] == 'assimp':
-            root = gdb.parse_and_eval(argv[1] + '[0]')
-            bones = argv[1]
-            tree = buildtreeAssimp(root,None,bones)
-
-        if argv[0] == 'bfs':
-            arr = argv[1]
-            tree = buildtreeBFS(arr)
-
-        if argv[0] == 'btree':
-            left = argv[1]
-            right = argv[2]
-            return
-
-        if argv[0] == 'atree':
-            children = argv[1]
-            count = argv[2]
-            return
-
+        tree = createtree(argv)
 
         pptree.print_tree(tree, horizontal = True)
 
 PrintTree()
-
-
-
 
 
 class DumpTree(gdb.Command):
@@ -219,16 +196,7 @@ class DumpTree(gdb.Command):
     def invoke(self, arg, from_tty):
         argv = gdb.string_to_argv(arg)
 
-        if len(argv) < 2:
-            raise gdb.GdbError('dumptree takes at least 3 args')
-
-        tree = None
-
-        if argv[0] == 'assimp':
-            root = gdb.parse_and_eval(argv[1] + '[0]')
-            bones = argv[1]
-            tree = buildtreeAssimp(root,None,bones)
-
+        tree = createtree(argv)
         filename = str(uuid.uuid4()) + '.txt'
 
         sys.stdout = open(filename,'w')
