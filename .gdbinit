@@ -107,52 +107,74 @@ import gdb
 import pptree
 import sys
 import webbrowser
+import uuid
+
+
+def buildtreeAssimp(node,parent,bones):
+
+    name = node['name'].string()
+    count = node['children_count']
+
+    tree = pptree.Node(name,parent)
+
+    for i in range(0,count):
+        index_array = node['childrenindex_array']
+        index = index_array[i]
+        n = gdb.parse_and_eval(bones + '[' + str(index) +']')
+
+        buildtreeAssimp(n,tree,bones)
+
+    return tree
+
+def buildtreeBFS(arr):
+    queue = []
+    count = int(gdb.parse_and_eval(arr + '.count'))
+
+    root = None
+
+    for i in range(0,count):
+        e = gdb.parse_and_eval(arr + '[' + str(i) +']')
+        name = e['name'].string()
+        children_count = e['children_count']
+
+        parent = None
+
+        if len(queue) > 0:
+            parent = queue.pop(0)
+
+        node = pptree.Node(name,parent)
+
+        if parent == None:
+            root = node
+
+        for j in range(0,children_count):
+            queue.append(node)
+
+    return root
+
+
+def createtree(argv):
+
+    if len(argv) < 2:
+        raise gdb.GdbError('printtree takes at least 3 args')
+
+    tree = None
+
+    if argv[0] == 'assimp':
+        root = gdb.parse_and_eval(argv[1] + '[0]')
+        bones = argv[1]
+        tree = buildtreeAssimp(root,None,bones)
+
+    if argv[0] == 'bfs':
+        arr = argv[1]
+        tree = buildtreeBFS(arr)
+
+    return tree
 
 class PrintTree(gdb.Command):
     def __init__(self):
         super (PrintTree, self).__init__ ('printtree', gdb.COMMAND_DATA)
 
-    def buildtreeAssimp(self,node,parent,bones):
-
-        name = node['name'].string()
-        count = node['children_count']
-
-        tree = pptree.Node(name,parent)
-
-        for i in range(0,count):
-            index_array = node['childrenindex_array']
-            index = index_array[i]
-            n = gdb.parse_and_eval(bones + '[' + str(index) +']')
-
-            self.buildtreeAssimp(n,tree,bones)
-
-        return tree
-
-    def buildtreeBFS(self,arr):
-        queue = []
-        count = int(gdb.parse_and_eval(arr + '.count'))
-
-        root = None
-
-        for i in range(0,count):
-            e = gdb.parse_and_eval(arr + '[' + str(i) +']')
-            name = e['name'].string()
-            children_count = e['children_count']
-
-            parent = None
-
-            if len(queue) > 0:
-                parent = queue.pop(0)
-
-            node = pptree.Node(name,parent)
-
-            if parent == None:
-                root = node
-
-            for j in range(0,children_count):
-                queue.append(node)
-
-        return root
 
     def invoke(self, arg, from_tty):
         argv = gdb.string_to_argv(arg)
@@ -165,11 +187,11 @@ class PrintTree(gdb.Command):
         if argv[0] == 'assimp':
             root = gdb.parse_and_eval(argv[1] + '[0]')
             bones = argv[1]
-            tree = self.buildtreeAssimp(root,None,bones)
+            tree = buildtreeAssimp(root,None,bones)
 
         if argv[0] == 'bfs':
             arr = argv[1]
-            tree = self.buildtreeBFS(arr)
+            tree = buildtreeBFS(arr)
 
         if argv[0] == 'btree':
             left = argv[1]
@@ -188,25 +210,11 @@ PrintTree()
 
 
 
+
+
 class DumpTree(gdb.Command):
     def __init__(self):
         super (DumpTree, self).__init__ ('dumptree', gdb.COMMAND_DATA)
-
-    def buildtreeAssimp(self,node,parent,bones):
-
-        name = node['name'].string()
-        count = node['children_count']
-
-        tree = pptree.Node(name,parent)
-
-        for i in range(0,count):
-            index_array = node['childrenindex_array']
-            index = index_array[i]
-            n = gdb.parse_and_eval(bones + '[' + str(index) +']')
-
-            self.buildtreeAssimp(n,tree,bones)
-
-        return tree
 
     def invoke(self, arg, from_tty):
         argv = gdb.string_to_argv(arg)
