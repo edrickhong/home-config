@@ -36,7 +36,7 @@
 	stop-tracking = "!f() { git rm --cached $1; }; f" #stop tracking a file
         pull-force = "!f() { git fetch && git reset --hard origin/`git symbolic-ref --short -q HEAD`; }; f" #stop tracking a file
 
-	stage-chunks = add -e #only stage parts of a file
+	stage-chunks = add --patch #only stage parts of a file
 	ignore = "!f() { echo $1 >> .gitignore; }; f" #add file to ignore list
 	test-commit-range = "!f() { git bisect start;git bisect bad $1; git bisect good $2;shift;shift;git bisect run $@;git bisect reset; }; f" # bad,good,test script
 	branch-list = "!f() { git branch -a; }; f" #list all branches

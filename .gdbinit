@@ -128,6 +128,32 @@ class PrintTree(gdb.Command):
 
         return tree
 
+    def buildtreeBFS(self,arr):
+        queue = []
+        count = int(gdb.parse_and_eval(arr + '.count'))
+
+        root = None
+
+        for i in range(0,count):
+            e = gdb.parse_and_eval(arr + '[' + str(i) +']')
+            name = e['name'].string()
+            children_count = e['children_count']
+
+            parent = None
+
+            if len(queue) > 0:
+                parent = queue.pop(0)
+
+            node = pptree.Node(name,parent)
+
+            if parent == None:
+                root = node
+
+            for j in range(0,children_count):
+                queue.append(node)
+
+        return root
+
     def invoke(self, arg, from_tty):
         argv = gdb.string_to_argv(arg)
 
@@ -137,9 +163,23 @@ class PrintTree(gdb.Command):
         tree = None
 
         if argv[0] == 'assimp':
-            root = gdb.parse_and_eval(argv[1])
-            bones = argv[2]
+            root = gdb.parse_and_eval(argv[1] + '[0]')
+            bones = argv[1]
             tree = self.buildtreeAssimp(root,None,bones)
+
+        if argv[0] == 'bfs':
+            arr = argv[1]
+            tree = self.buildtreeBFS(arr)
+
+        if argv[0] == 'btree':
+            left = argv[1]
+            right = argv[2]
+            return
+
+        if argv[0] == 'atree':
+            children = argv[1]
+            count = argv[2]
+            return
 
 
         pptree.print_tree(tree, horizontal = True)
