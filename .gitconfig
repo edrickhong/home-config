@@ -2,7 +2,7 @@
 	email = edrickhong@gmail.com
 	name = ehzx
 [core]
-	editor = vim 
+	editor = nvim 
 [alias]
 	stage = add #stage file
 	stage-all = !git add . && git status #stage all files and report status
@@ -37,6 +37,7 @@
         pull-force = "!f() { git fetch && git reset --hard origin/`git symbolic-ref --short -q HEAD`; }; f" #stop tracking a file
 
 	stage-chunks = add --patch #only stage parts of a file
+	stage-man-chunks = add -e
 	ignore = "!f() { echo $1 >> .gitignore; }; f" #add file to ignore list
 	test-commit-range = "!f() { git bisect start;git bisect bad $1; git bisect good $2;shift;shift;git bisect run $@;git bisect reset; }; f" # bad,good,test script
 	branch-list = "!f() { git branch -a; }; f" #list all branches
@@ -45,6 +46,7 @@
 
 
 	stash-chunks = stash -- #only stage parts of a file
+	diff-staged = status -v
 [merge]
 	tool = meld
 [status]
