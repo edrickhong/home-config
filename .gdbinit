@@ -110,12 +110,44 @@ import webbrowser
 import uuid
 
 
-def buildtreeAssimp(node,parent,bones):
+class GNode:
 
-    name = node['name'].string()
-    count = node['children_count']
+    def __init__(self,val,parent = None):
+        self.val = val
+        self.parent = parent
+        self.children = []
 
-    tree = pptree.Node(name,parent)
+        if parent:
+            self.parent.children.append(self)
+
+def Gprint_tree(root,horizontal= False):
+    pptree.print_tree(current_node = root,nameattr = 'val',horizontal = horizontal)
+
+def gdbValToPythonVal(val):
+
+    t = None
+
+    try:
+        t = val.string()
+    except:
+        t = None
+
+    if t != None:
+        return t
+    if val.type.code == gdb.TYPE_CODE_INT:
+        t = int(val)
+
+    elif val.type.code == gdb.TYPE_CODE_FLT:
+        t = float(val)
+
+    return t
+
+def buildtreeAssimp(node,parent,bones,val_name = 'name',ch_count = 'children_count'):
+
+    val = gdbValToPythonVal(node[val_name])
+    count = node[ch_count]
+
+    tree = GNode(val,parent)
 
     for i in range(0,count):
         index_array = node['childrenindex_array']
@@ -126,7 +158,7 @@ def buildtreeAssimp(node,parent,bones):
 
     return tree
 
-def buildtreeBFS(arr):
+def buildtreeBFS(arr,val_name = 'name',ch_count = 'children_count'):
     queue = []
     count = int(gdb.parse_and_eval(arr + '.count'))
 
@@ -134,15 +166,15 @@ def buildtreeBFS(arr):
 
     for i in range(0,count):
         e = gdb.parse_and_eval(arr + '[' + str(i) +']')
-        name = e['name'].string()
-        children_count = e['children_count']
+        val = gdbValToPythonVal(e[val_name])
+        children_count = e[ch_count]
 
         parent = None
 
         if len(queue) > 0:
             parent = queue.pop(0)
 
-        node = pptree.Node(name,parent)
+        node = GNode(val,parent)
 
         if parent == None:
             root = node
@@ -184,7 +216,7 @@ class PrintTree(gdb.Command):
 
         tree = createtree(argv)
 
-        pptree.print_tree(tree, horizontal = True)
+        Gprint_tree(tree, horizontal = True)
 
 PrintTree()
 
@@ -200,7 +232,7 @@ class DumpTree(gdb.Command):
         filename = str(uuid.uuid4()) + '.txt'
 
         sys.stdout = open(filename,'w')
-        pptree.print_tree(tree, horizontal = True)
+        Gprint_tree(tree, horizontal = True)
         sys.stdout.close()
 
         webbrowser.open(filename)
