@@ -47,6 +47,7 @@
 
 	stash-chunks = stash -- #only stage parts of a file
 	diff-staged = status -v
+	clone-f-here = "!f() { git init; git remote add $1; git fetch; git reset origin/master; git checkout -t origin/master;}; f" #clone to current directory ignoring non empty`
 [merge]
 	tool = meld
 [status]
