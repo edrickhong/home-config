@@ -28,3 +28,7 @@ nvme
 storage
 .gdb_history
 .python_history
+.pulse-cookie
+.steam/
+.steampath
+.steampid

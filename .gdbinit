@@ -33,7 +33,10 @@ end
 
 python
 import gdb
-import sdl2.ext as sdl
+import sys
+import numpy as np
+from PIL import Image
+import time
 
 class RenderMem(gdb.Command):
     def __init__(self):
@@ -45,29 +48,18 @@ class RenderMem(gdb.Command):
         if len(argv) != 3:
             raise gdb.GdbError('rendermem takes exactly 3 args.')
 
-        #addr = gdb.parse_and_eval(argv[0] +'[0][0]')
-        base_addr = argv[0]
-        w = int( argv[1] )
-        h = int( argv[2] )
+        addr = int(gdb.parse_and_eval(argv[0]))
+        w = int( gdb.parse_and_eval(argv[1]) )
+        h = int( gdb.parse_and_eval(argv[2]) )
 
-        sdl.init()
+        size = w * h * 4
 
-        window = sdl.Window("Rendermem",size = (w,h))
-
-        window.show()
-
-        surface = window.get_surface()
-
-        for y in range(0,h):
-            for x in range(0,w):
-                val = int(gdb.parse_and_eval(base_addr + '[' + str(x) + '][' + str(y) + ']'))
-                color = sdl.Color(255,255,255)
-                sdl.fill(surface,color,(x,y,w,h))
+        pixels = gdb.selected_inferior().read_memory(addr,size)
 
 
-        input('')
+        new_image = Image.frombytes('RGBA',(w,h),bytes(pixels))
+        new_image.show()
 
-        sdl.quit()
 
 RenderMem()
 
