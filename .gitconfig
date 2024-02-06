@@ -62,3 +62,8 @@
 
 [fetch]
 	recurseSubmodules = on-demand
+[url "https://"]
+	insteadOf = git://
+[safe]
+	directory = /home/edrickhong/nvme/Cu
+	directory = /home/edrickhong/nvme/Cu/Cu_std
