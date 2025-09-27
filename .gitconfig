@@ -43,7 +43,7 @@
 	branch-list = "!f() { git branch -a; }; f" #list all branches
 	branch-create = "!f() { git branch $1; git push -u origin $1;}; f" #create a new branch
 	branch-set-upstream = "!f() { git branch --set-upstream-to $1;}; f" #sets the current active branch to this upstream
-
+    branch-copy-state = "!f() { git merge -s ours --no-commit $1 && git read-tree -u --reset $1 && git submodule update --init --recursive && git status;}; f" #make the changes required to ensure the current branch has the same state as the given branch
 
 	stash-chunks = stash -- #only stage parts of a file
 	diff-staged = status -v
